@@ -21,20 +21,23 @@ connection.connect(function(err) {
     getAll();
   });
 
-function executeQuery(sql, cb) 
-  bamazon_db.query(sql, function (err, result, fields
-  ){
-    if(err) throw err;
-    cb(result);
+// function executeQuery(sql, cb) 
+//   bamazon_db.query(sql, function (err, result, fields
+//   ){
+//     if(err) throw err;
+//     cb(result);
 
-  });
+//   });
 
 
 function getAll() {
-  var sql ="SELECT * FROM products";
+  var sql ="SELECT * FROM products;";
   connection.query(sql, function(err, result){
     if(err) throw err;
-    console.log("Result: "+ result);
+    for(i = 0; i < result.length; i++){
+      console.log("Result: " + result [i].productName+ "id: " + result[i].id);
+    }
+    
     
   });
   
@@ -42,27 +45,27 @@ function getAll() {
 
 // get the table of products to show in the command line
 
- fetchProducts();
+//  fetchProducts();
  
 
-function fetchProducts(res){
-  executeQuery("SELECT * FROM products", function(result) {
-    res.write("<table>");
-    res.write("<tr");
-    for(var column in result[0]) {
-      res.write("<td><lable>" + column + "</table></td>");
-    }
-    res.write("</tr>");
-    for(var row in result){
-      res.write("tr>");
-      for(var column in result[row]){
-        res.write("<td><lable>" + result[row][column]+ "</lable></td>");
-      }
-      res.write("</td");
-    }
-  res.write("</table>")
-  });
-}
+// function fetchProducts(res){
+//   executeQuery("SELECT * FROM products", function(result) {
+//     res.write("<table>");
+//     res.write("<tr");
+//     for(var column in result[0]) {
+//       res.write("<td><lable>" + column + "</table></td>");
+//     }
+//     res.write("</tr>");
+//     for(var row in result){
+//       res.write("tr>");
+//       for(var column in result[row]){
+//         res.write("<td><lable>" + result[row][column]+ "</lable></td>");
+//       }
+//       res.write("</td");
+//     }
+//   res.write("</table>")
+//   });
+// }
 // get the questions to show back up
 var questions = [
   {
@@ -71,15 +74,34 @@ var questions = [
         response: 'INTEGER'
   },
   {
-    name: "Quantitiy",
+    name: "Quantity",
     message: "How many of those do you want to buy?",
     response: 'INTEGER'
   }
 ];
 
-inquirer.prompt(questions), function(response) {
+inquirer.prompt(questions).then(function(response) {
   console.log(response);
-};
+  var sql ="SELECT * FROM products WHERE id="+ parseInt(response.action);
+  connection.query(sql, function(err, result){
+    if(err) throw err;
+    // for(i = 0; i < result.length; i++){
+    //     console.log("Result: " + result [i].productName+ "id: " + result[i].id);
+    // }
+if(result[0].stockQuantity < parseInt(response.Quantity)){
+  console.log("Insuficient Quantity")
+}
+else{
+  var total= parseInt(response.Quantity)*result[0].price;
+  console.log(total)
+
+  var updateSql= "update products set stockQuantity = stockQuantity - ? WHERE id = ?";
+  connection.query(updateSql, [parseInt(response.Quantity), parseInt(response.action)], function(err, res){
+    console.log("Updated")
+  })
+}
+  })
+});
 
 
 // once order is placed check the quantity
