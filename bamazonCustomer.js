@@ -5,7 +5,7 @@ var connection = mysql.createConnection({
   host: "localhost",
 
   // Your port; if not 3306
-  port: 3306,
+  port: 3307,
 
   // Your username
   user: "root",
@@ -15,63 +15,31 @@ var connection = mysql.createConnection({
   database: "bamazon_db"
 });
 
-connection.connect(function(err) {
-    if (err) throw err;
-    // runSearch();
-    getAll();
-  });
-
-// function executeQuery(sql, cb) 
-//   bamazon_db.query(sql, function (err, result, fields
-//   ){
-//     if(err) throw err;
-//     cb(result);
-
-//   });
+connection.connect(function (err) {
+  if (err) throw err;
+  
+  getAll();
+});
 
 
 function getAll() {
-  var sql ="SELECT * FROM products;";
-  connection.query(sql, function(err, result){
-    if(err) throw err;
-    for(i = 0; i < result.length; i++){
-      console.log("Result: " + result [i].productName+ "id: " + result[i].id);
+  var sql = "SELECT * FROM products;";
+  connection.query(sql, function (err, result) {
+    if (err) throw err;
+    for (i = 0; i < result.length; i++) {
+      console.log("Result: " + result[i].id + ' productName ' + result[i].productName + ' departmentName ' + result[i].departmentName + ' price ' + result[i].price + ' stockQuantity' + result[i].stockQuantity);
     }
-    
-    
+
+
   });
-  
+
 }
 
-// get the table of products to show in the command line
-
-//  fetchProducts();
- 
-
-// function fetchProducts(res){
-//   executeQuery("SELECT * FROM products", function(result) {
-//     res.write("<table>");
-//     res.write("<tr");
-//     for(var column in result[0]) {
-//       res.write("<td><lable>" + column + "</table></td>");
-//     }
-//     res.write("</tr>");
-//     for(var row in result){
-//       res.write("tr>");
-//       for(var column in result[row]){
-//         res.write("<td><lable>" + result[row][column]+ "</lable></td>");
-//       }
-//       res.write("</td");
-//     }
-//   res.write("</table>")
-//   });
-// }
-// get the questions to show back up
 var questions = [
   {
-        name: "action",
-        message: "What is the ID number of the product you would like to buy?",
-        response: 'INTEGER'
+    name: "action",
+    message: "What is the ID number of the product you would like to buy?",
+    response: 'INTEGER'
   },
   {
     name: "Quantity",
@@ -80,37 +48,25 @@ var questions = [
   }
 ];
 
-inquirer.prompt(questions).then(function(response) {
+inquirer.prompt(questions).then(function (response) {
   console.log(response);
-  var sql ="SELECT * FROM products WHERE id="+ parseInt(response.action);
-  connection.query(sql, function(err, result){
-    if(err) throw err;
+  var sql = "SELECT * FROM products WHERE id=" + parseInt(response.action);
+  connection.query(sql, function (err, result) {
+    if (err) throw err;
     // for(i = 0; i < result.length; i++){
     //     console.log("Result: " + result [i].productName+ "id: " + result[i].id);
     // }
-if(result[0].stockQuantity < parseInt(response.Quantity)){
-  console.log("Insuficient Quantity")
-}
-else{
-  var total= parseInt(response.Quantity)*result[0].price;
-  console.log(total)
+    if (result[0].stockQuantity < parseInt(response.Quantity)) {
+      console.log("Insuficient Quantity")
+    }
+    else {
+      var total = parseInt(response.Quantity) * result[0].price;
+      console.log(total)
 
-  var updateSql= "update products set stockQuantity = stockQuantity - ? WHERE id = ?";
-  connection.query(updateSql, [parseInt(response.Quantity), parseInt(response.action)], function(err, res){
-    console.log("Updated")
-  })
-}
+      var updateSql = "update products set stockQuantity = stockQuantity - ? WHERE id = ?";
+      connection.query(updateSql, [parseInt(response.Quantity), parseInt(response.action)], function (err, res) {
+        console.log("Updated")
+      })
+    }
   })
 });
-
-
-// once order is placed check the quantity
-
-// IF the order quantity is MORE than the store quantity... tell the customer "Insufficient quantity!" and prevent order from processing
-
-
-// ELSE fill the order
-// get the total price for the products wanted by the customer
-// update the SQL database to show the new  quantity to update in the table
-
-// Show the customer the TOTAL cost of their purchase
